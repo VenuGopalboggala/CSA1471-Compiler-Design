@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <string.h>
+#define MAX_RULES 10
+#define MAX_LEN 50
+char nonTerminals[MAX_RULES];
+char productions[MAX_RULES][MAX_LEN];
+char newProductions[MAX_RULES][MAX_LEN];
+int numRules;
+void eliminateLeftFactoring() 
+{
+    for (int i = 0; i < numRules; i++) 
+	{
+        int commonPrefixLen = 0;
+        for (int j = 0; j < strlen(productions[i]) && j < strlen(productions[i - 1]); j++) 
+		{
+            if (productions[i][j] == productions[i - 1][j]) 
+			{
+                commonPrefixLen++;
+            } 
+			else 
+			{
+                break;
+            }
+        }
+
+        if (commonPrefixLen > 0) 
+		{
+            char alpha[MAX_LEN];
+            char beta1[MAX_LEN];
+            char beta2[MAX_LEN];
+            int k = 3; 
+            int alphaIndex = 0;
+            while (productions[i][k] != '\0' && k < commonPrefixLen) 
+			{
+                alpha[alphaIndex++] = productions[i][k++];
+            }
+            alpha[alphaIndex] = '\0';
+            int beta1Index = 0;
+            while (productions[i][k] != '\0') 
+			{
+                beta1[beta1Index++] = productions[i][k++];
+            }
+            beta1[beta1Index] = '\0';
+            k = 3 + commonPrefixLen; 
+            int beta2Index = 0;
+            while (productions[i - 1][k] != '\0') 
+			{
+                beta2[beta2Index++] = productions[i - 1][k++];
+            }
+            beta2[beta2Index] = '\0';
+            sprintf(newProductions[i], "%c -> %s%c'", nonTerminals[i], alpha, nonTerminals[i]);
+            sprintf(newProductions[numRules], "%c' -> %s | %s", nonTerminals[i], beta1, beta2);
+            numRules++;
+        } 
+		else 
+		{
+            strcpy(newProductions[i], productions[i]);
+        }
+    }
+}
+int main() 
+{
+    printf("Enter the number of rules: ");
+    scanf("%d", &numRules);
+    printf("Enter the production rules:\n");
+    for (int i = 0; i < numRules; i++) 
+	{
+        scanf(" %c -> %[^\n]", &nonTerminals[i], productions[i]);
+    }
+    eliminateLeftFactoring();
+    printf("\nGrammar after eliminating left factoring:\n");
+    for (int i = 0; i < numRules; i++) 
+	{
+        printf("%s\n", newProductions[i]);
+    }
+    return 0;
+}
